@@ -105,8 +105,8 @@ end
 M_fltr    = sparse(diag(m_fltr));  % mass matrix for filtering         [1e3 kg]
 etau_fltr = -m_fltr;               % uncertain influence for filtering [1e3 kg]
 
-theta = {x0; M; C; k; alpha_BW; beta_BW; gamma_BW; n_BW; dt; tolerance;
-         max_iter; []; []; []; u_k; eta_k; phi_k; u_u; eta_u; phi_u};
+theta = {x0; []; C; k; []; beta_BW; gamma_BW; n_BW; dt; tolerance;
+         max_iter; []; []; []; u_k; eta_k; phi_k; u_u; []; phi_u};
 
 %% MAIN:
 N_noise = numel(noise_ratio);
@@ -127,12 +127,16 @@ for i = 1:N_measu
     theta{14} = Sa{i};
 
     % 2) create date with different noise levels
+    theta{2}  = M;
+    theta{5}  = alpha_BW;
+    theta{19} = eta_u;
+
     for j = 1:N_noise
         rng(1234)
         [x, y{i, j}] = get_data(noise_ratio(j), theta);
     end
 
-    % 3) icorporate the erroneous parameters and analyse all the datasets
+    % 3) incorporate the erroneous parameters and analyse all the datasets
     theta{2}  = M_fltr;
     theta{5}  = alpha_fltr;
     theta{19} = etau_fltr;
@@ -169,22 +173,25 @@ The units are as follows
 %}
 
 %% REPORT:
-RRMSE_lim = [min([xRRMSE; uRRMSE], [], 'all'), max([xRRMSE; uRRMSE], [], 'all')];
-edges     = linspace(RRMSE_lim(1), RRMSE_lim(2), 11);
-
 figure
 hold on
 for i = 1:N_measu
     for j = 1:N_noise
         subplot(N_measu, N_noise, j + N_noise*(i - 1))
         hold on
-        plot(xRRMSE(           (1:N_DOFs), i, j),  'b-', 'DisplayName',   'u(t)')
-        plot(xRRMSE(  N_DOFs + (1:N_DOFs), i, j), 'r--', 'DisplayName',   'v(t)')
-        plot(xRRMSE(2*N_DOFs + (1:N_DOFs), i, j), 'g-.', 'DisplayName', '\xi(t)')
+
+        for k = 1:N_DOFs
+            RRMSE_DOF = xRRMSE(k:N_DOFs:end, i, j);
+            plot([k, k], [min(RRMSE_DOF), max(RRMSE_DOF)], 'k-')
+        end
+
+        plot(xRRMSE(           (1:N_DOFs), i, j), 'b-', 'DisplayName',   'u(t)')
+        plot(xRRMSE(  N_DOFs + (1:N_DOFs), i, j), 'r-', 'DisplayName',   'v(t)')
+        plot(xRRMSE(2*N_DOFs + (1:N_DOFs), i, j), 'g-', 'DisplayName', '\xi(t)')
         xlabel 'DOF'
         ylabel 'RRMSE'
-        axis tight
-        ylim(RRMSE_lim)
+        xlim([0.5,           N_DOFs + 0.5])
+        ylim([  0, max(xRRMSE, [], 'all')])
         grid on
     end
 end
