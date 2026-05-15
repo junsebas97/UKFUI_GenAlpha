@@ -90,8 +90,8 @@ theta = {x0; M; C; k; alpha_BW; beta_BW; gamma_BW; n_BW; dt; tolerance;
 theta{2} = M_fltr;
 theta{5} = alpha_fltr;
 
-[mx, Px, mu, Pu] = this_filter(y, mx_0, Px_0, mu_0, Pu_0, E, Q, R, kappa, ...
-                                 alpha, beta, theta);
+[mx, Px, mu, Pu] = Ga_UKFUI(y, mx_0, Px_0, mu_0, Pu_0, E, Q, R, kappa, ...
+                            alpha, beta, theta);
 
 [mx_UKFUL, Px_UKFUL, mfu_UKFUL, Pfu_UKFUL] = UKF_UL(y, mx_0, Px_0, mu_0,  ...
                                                     Pu_0, E, Q, R, kappa, ...
@@ -109,24 +109,24 @@ The units are as follows
 %}
 
 % evaluate the RRMSE of the estimations
-xRRMSE_this  = rmse(      mx, x, 2)./max(x, [], 2);        % [m], [m/s], [m]
-xRRMSE_UKFUL = rmse(mx_UKFUL, x, 2)./max(x, [], 2);        % -- Eq.83
-xRRMSE_UKFUI = rmse(mx_UKFUI, x, 2)./max(x, [], 2);
+xRRMSE_GaUKFUI = rmse(      mx, x, 2)./max(x, [], 2);        % [m], [m/s], [m]
+xRRMSE_UKFUL   = rmse(mx_UKFUL, x, 2)./max(x, [], 2);        % -- Eq.83
+xRRMSE_UKFUI   = rmse(mx_UKFUI, x, 2)./max(x, [], 2);
 
-uRRMSE_this  = rmse(       mu, u_u, 2)./max(u_u, [], 2);   % [kN] -- Eq.83
-uRRMSE_UKFUL = rmse(mfu_UKFUL, u_u, 2)./max(u_u, [], 2);
-uRRMSE_UKFUI = rmse( fu_UKFUI, u_u, 2)./max(u_u, [], 2);
+uRRMSE_GaUKFUI = rmse(       mu, u_u, 2)./max(u_u, [], 2);   % [kN] -- Eq.83
+uRRMSE_UKFUL   = rmse(mfu_UKFUL, u_u, 2)./max(u_u, [], 2);
+uRRMSE_UKFUI   = rmse( fu_UKFUI, u_u, 2)./max(u_u, [], 2);
 
 %% REPORT:
 compare_estimation(x, y, t, {mx, mx_UKFUL, mx_UKFUI}, {Su; Sv; sparse(0, N_DOFs)}, ...
-                   ["This filter", "UKF-UL", "UKF-UI"])
+                   ["G\alpha-UKFUI", "UKF-UL", "UKF-UI"])
 compare_estimation(u_u, [], t, {mu, mfu_UKFUL, fu_UKFUI}, {sparse(0, nu)}, ...
-                   ["This filter", "UKF-UL", "UKF-UI"])
+                   ["G\alpha-UKFUI", "UKF-UL", "UKF-UI"])
 
 plot_estimation(  x,  y, t, mx, Px, {Su; Sv; sparse(0, N_DOFs)})
 plot_estimation(u_u, [], t, mu, Pu, {        sparse(0,     nu)})
 
-print_RMSE([  xRRMSE_this, xRRMSE_UKFUL, xRRMSE_UKFUI], ...
-           ["This filter",     "UKF-UL",     "UKF-UI"])
-print_RMSE([  uRRMSE_this, uRRMSE_UKFUL, uRRMSE_UKFUI], ...
-           ["This filter",     "UKF-UL",     "UKF-UI"])
+print_RMSE([xRRMSE_GaUKFUI, xRRMSE_UKFUL, xRRMSE_UKFUI], ...
+           [    "Ga-UKFUI",     "UKF-UL",     "UKF-UI"])
+print_RMSE([uRRMSE_GaUKFUI, uRRMSE_UKFUL, uRRMSE_UKFUI], ...
+           [    "Ga-UKFUI",     "UKF-UL",     "UKF-UI"])

@@ -143,10 +143,10 @@ for i = 1:N_measu
 
     for j = 1:N_noise
         % 3.1) apply the proposed filter
-        [mx{i, j}, Px{i, j}, mu{i, j}, Pu{i, j}] = this_filter(y{i, j}, mx_0, Px_0, ...
-                                                               mu_0, Pu_0, E, Q,    ...
-                                                               R{i}, kappa, alpha,  ...
-                                                               beta, theta);
+        [mx{i, j}, Px{i, j}, mu{i, j}, Pu{i, j}] = Ga_UKFUI(y{i, j}, mx_0, Px_0, ...
+                                                            mu_0, Pu_0, E, Q,    ...
+                                                            R{i}, kappa, alpha,  ...
+                                                            beta, theta);
         % 3.2) evaluate the RRMSE -- Eq.83
         uRRMSE(:, i, j) = rmse(mu{i, j}, u_u, 2)./max(u_u, [], 2);    % [m/s2]
         xRRMSE(:, i, j) = rmse(mx{i, j},   x, 2)./max(  x, [], 2);    % [m],
@@ -185,9 +185,9 @@ for i = 1:N_measu
             plot([k, k], [min(RRMSE_DOF), max(RRMSE_DOF)], 'k-')
         end
 
-        plot(xRRMSE(           (1:N_DOFs), i, j), 'b-', 'DisplayName',   'u(t)')
-        plot(xRRMSE(  N_DOFs + (1:N_DOFs), i, j), 'r-', 'DisplayName',   'v(t)')
-        plot(xRRMSE(2*N_DOFs + (1:N_DOFs), i, j), 'g-', 'DisplayName', '\xi(t)')
+        plot(xRRMSE(           (1:N_DOFs), i, j), 'b*', 'DisplayName',   'u(t)')
+        plot(xRRMSE(  N_DOFs + (1:N_DOFs), i, j), 'ro', 'DisplayName',   'v(t)')
+        plot(xRRMSE(2*N_DOFs + (1:N_DOFs), i, j), 'g.', 'DisplayName', '\xi(t)')
         xlabel 'DOF'
         ylabel 'RRMSE'
         xlim([0.5,           N_DOFs + 0.5])

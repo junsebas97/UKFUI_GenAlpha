@@ -1,5 +1,5 @@
-function [mx, Px, mu, Pu] = this_filter(y, mx_0, Px_0, mu_0, Pu_0, E, Q, R, ...
-                                        kappa, alpha, beta, theta)
+function [mx, Px, mu, Pu] = Ga_UKFUI(y, mx_0, Px_0, mu_0, Pu_0, E, Q, R, ...
+                                     kappa, alpha, beta, theta)
 %{
 This code implements the nonlinear Bayesian filter with uncertain inputs
 based on the generalised-alpha method. It estimates the states and the
